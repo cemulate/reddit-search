@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+    <meta charset="utf-8">
+    <title>RedditSearch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/style.css" rel="stylesheet">
+    <link href="/static/animate.css" rel="stylesheet">
+
+    <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <script>
+
+        function imgError(image) {
+            image.onerror = ""
+            image.src = "/static/noimage.png"
+            return true
+        }
+
+    </script>
+
+</head>
+
+
+
+<body ng-app="RedditSearch">
+
+<div class="container" ng-controller="AppController">
+    
+    <h2> Reddit Search </h2>
+
+    <hr>
+
+    <div class="row-fluid">
+        <div class="span4">
+            <div class="well well-large">
+                <form novalidate onsubmit="return false">
+                    <label for="">Username:</label>
+                    <input type="text" class="input" ng-model="form_data.username"></input>
+                    <label for="">Feed:</label>
+                    <select name="" id="typeSelector" ng-model="form_data.type">
+                        <option value="liked">Liked</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="disliked">Disliked</option>
+                    </select>
+                    <div class="controls">
+                        <button class="btn" ng-click="beginSearch()">Start</button>
+                        <img class="hspace20" ng-if="isBusy()" src="/static/ajax-loader.gif">
+                    </div>
+                </form>
+                <hr>
+                <div class="page-header">
+                    <h4>
+                        Filter results: 
+                        <small>
+                            {{(posts | filter:postfilter).length}} out of {{posts.length}} 
+                            <span class="muted" ng-if="reachedRedditLimit">(Last page)</span>
+                        </small>
+                    </h4>
+                </div>
+                <form novalidate>
+                    <label for="">Subreddit:</label>
+                    <input type="text" ng-model="postfilter.subreddit">
+                    <label for="">Title contains:</label>
+                    <input type="text" ng-model="postfilter.title">
+                    <label for="">Domain:</label>
+                    <input type="text" ng-model="postfilter.domain">
+                    <label for="">Original poster:</label>
+                    <input type="text" ng-model="postfilter.op">
+                    <label for="">File extension:</label>
+                    <input type="text" ng-model="postfilter.extension">
+                </form>
+            </div>
+        </div>
+        <div class="span8">
+            <div ng-if="error" ng-animate="{enter: 'animated fadeInDown'}">
+                <div ng-switch on="error" class="alert alert-warning">
+                    <div ng-switch-when="no_page">
+                        <p> Timeout (or no such page) </p>
+                        <p> You may be trying to access your /liked or /disliked feeds without them being public in Reddit's settings </p>
+                    </div>
+                    <div ng-switch-default>
+                        <p> An unknown error occured </p>
+                    </div>
+                </div>    
+            </div>
+
+            <div ng-repeat="monthGroup in monthGroups">
+                
+                <div class="alert alert-info" ng-if="(monthGroup.posts | filter:postfilter).length > 0">
+                    {{monthGroup.month.format('MMMM YYYY')}}
+                </div>
+                
+                <table class="table tabled-bordered table-striped custom-table">
+                    <tbody>
+                        <tr ng-repeat="post in monthGroup.posts | filter:postfilter">
+                            <td>
+                                <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
+                                <!-- <div class="custom-thumb" style="background: url('{{post.thumbnail}}');"></div> -->
+                            </td>
+
+                            <td>
+                                <p class="ellipsis">
+                                    <a href="{{post.comments}}">{{post.title}}</a><br>
+                                    <span class="muted">{{post.domain}} ({{post.extension}})</span>
+                                </p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>-->
+<script src="http://code.angularjs.org/1.1.5/angular.js"></script>
+
+<script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+
+<script src="/static/RedditSearch.js"></script>
+
+</body>
+
+
+
+</html>

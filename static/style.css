@@ -1,0 +1,61 @@
+/* Layout fixes */
+
+.space20 {
+    height: 20px;
+}
+
+.space30 {
+    height: 30px;
+}
+
+.space40 {
+    height: 40px;
+}
+
+.space60 {
+    height: 60px;
+}
+
+.hspace20 {
+    margin-left: 20px;
+}
+
+img.custom-thumb {
+    margin: 10%;
+    width: 80%;
+    height: 80%;
+}
+
+table {
+    table-layout: fixed;
+}
+
+table th, table td {
+    overflow: hidden;
+}
+
+table td:nth-child(1) {
+    width: 10%;
+}
+
+table td:nth-child(2) {
+    width: 90%;
+}
+
+p.ellipsis {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Classes */
+
+.redp {
+    color: red;
+    font-weight: bold;
+}
+
+.custom-table img {
+    padding: -8px;
+}
