@@ -36,14 +36,18 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
     // Temporarily holds the data in the form before submit is pressed (so it doesn't live update)
     $scope.form_data = {
         username: "",
-        type: ""
+        userpage: "",
+        subreddit: "",
+        subreddit_feed: ""
+    }
+
+    $scope.mode = "userpage"
+    $scope.setMode = function (s) {
+        $scope.mode = s
     }
 
     // This gets copied over from form_data on beginSearch()
-    $scope.data = {
-        username: "",
-        type: ""
-    }
+    $scope.data = {}
 
     // The filter object for the filter results panel
     $scope.postfilter = {
@@ -54,6 +58,12 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
         extension: ""
     }
 
+
+    // The main collection
+    $scope.posts = []
+
+    // This collection serves to group the main collection by month
+    $scope.monthGroups = []
 
     // This re-initializes every variable needed for a brand new search
     $scope.reset = function () {
@@ -71,18 +81,6 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
         $scope.error = null
     }
 
-
-    // The main collection
-    $scope.posts = []
-
-    // This collection serves to group the main collection by month
-    $scope.monthGroups = []
-
-    // Tracks whether or not we're currently retrieving posts
-    $scope._retrieveTimeout = null
-    $scope._errorTimeout = null
-    $scope._ajaxRequest = null
-
     // Reset now
     $scope.reset()
 
@@ -91,9 +89,19 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
     }
 
     $scope.updateSortingGrouping = function () {
-        $scope.posts.sort(function (postA, postB) {
-            return postB.rawTime - postA.rawTime
-        })
+        if ($scope.mode == "userpage") {
+            
+            // If we're getting this from a user page, we want to sort by time
+
+            $scope.posts.sort(function (postA, postB) {
+                return postB.rawTime - postA.rawTime
+            })
+
+        } else if ($scope.mode == "manual") {
+            
+            // Otherwise it could already be sorted by hot/controversial etc. so don't mess with it
+        
+        }
 
         var i = 0
         $scope.monthGroups.length = 0
@@ -116,13 +124,26 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
 
     $scope.retrievePosts = function () {
 
-        url = "http://www.reddit.com/user/" + $scope.data.username + "/" + $scope.data.type + ".json?jsonp=?&limit=100&sort=new"
+        var url = ""
+
+        // Url is constructed from data differently depending on mode:
+
+        if ($scope.mode == "userpage") {
+            
+            url = "http://www.reddit.com/user/" + $scope.data.username + "/" + $scope.data.type + ".json?jsonp=?&limit=100&sort=new"
+        
+        } else if ($scope.mode == "subreddit") {
+            
+            url = "http://www.reddit.com/r/" + $scope.data.subreddit + "/" + $scope.data.subreddit_feed + ".json?jsonp=?&limit=100"
+        
+        }
 
         if ($scope._latestChildName) {
             url += "&after=" + $scope._latestChildName
         }
 
         $scope._ajaxRequest = $.getJSON(url, function (ret) {
+            console.log(ret)
             $scope.$apply(function () {
 
                 if ($scope._errorTimeout) {
@@ -186,12 +207,10 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
 
     }
 
-    $scope.beginSearch = function () {
-        
-        // Commit form_data to the actual data array
-        angular.copy($scope.form_data, $scope.data)
+    $scope.stopSearch = function () {
 
-        $scope.reset()
+        // End any async items. Any one of these could be active depending on where the previous
+        // search was in its progress. 
 
         if ($scope._errorTimeout) {
             clearTimeout($scope._errorTimeout)
@@ -207,6 +226,18 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
             $scope._ajaxRequest.abort()
             $scope._ajaxRequest = null
         }
+    }
+
+    $scope.beginSearch = function () {
+        
+        // In case one's currently running
+        $scope.stopSearch()
+
+        // Reset all the intermediate variables
+        $scope.reset()
+
+        // Commit form_data to the actual data array
+        angular.copy($scope.form_data, $scope.data)
 
         // If the timer is not currently repeatedly calling retrieve, start it up. 
         // It will keep itself going after the first call

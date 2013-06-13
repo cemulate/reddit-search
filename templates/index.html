@@ -19,7 +19,7 @@
 
         function imgError(image) {
             image.onerror = ""
-            image.src = "/static/noimage.png"
+            image.src = "/static/noimage2.png"
             return true
         }
 
@@ -40,18 +40,42 @@
     <div class="row-fluid">
         <div class="span4">
             <div class="well well-large">
+                
+                <ul class="nav nav-tabs">
+                    <li ng-class="mode == 'userpage' ? 'active' : ''">
+                        <a href="" ng-click="setMode('userpage')">By user page</a>
+                    </li>
+                    <li ng-class="mode == 'subreddit' ? 'active' : ''">
+                        <a href="" ng-click="setMode('subreddit')">By subreddit</a>
+                    </li>
+                </ul>
+
                 <form novalidate onsubmit="return false">
-                    <label for="">Username:</label>
-                    <input type="text" class="input" ng-model="form_data.username"></input>
-                    <label for="">Feed:</label>
-                    <select name="" id="typeSelector" ng-model="form_data.type">
-                        <option value="liked">Liked</option>
-                        <option value="submitted">Submitted</option>
-                        <option value="disliked">Disliked</option>
-                    </select>
+                    <div ng-switch on="mode">
+                        <div ng-switch-when="userpage">
+                            <label for="">Username:</label>
+                            <input type="text" class="input" ng-model="form_data.username"></input>
+                            <label for="">Feed:</label>
+                            <select name="" ng-model="form_data.userpage">
+                                <option value="liked">Liked</option>
+                                <option value="submitted">Submitted</option>
+                                <option value="disliked">Disliked</option>
+                            </select>
+                        </div>
+                        <div ng-switch-when="subreddit">
+                            <label for="">Subreddit (can be multi):</label>
+                            <input type="text" class="input" ng-model="form_data.subreddit"></input>
+                            <label for="">Feed sorting type:</label>
+                            <select name="" ng-model="form_data.subreddit_feed">
+                                <option value="new">New</option>
+                                <option value="hot">Hot</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="controls">
                         <button class="btn" ng-click="beginSearch()">Start</button>
                         <img class="hspace20" ng-if="isBusy()" src="/static/ajax-loader.gif">
+                        <a class="hspace20" ng-if="isBusy()" ng-click="stopSearch()">Stop</a>
                     </div>
                 </form>
                 <hr>
@@ -93,27 +117,30 @@
 
             <div ng-repeat="monthGroup in monthGroups">
                 
-                <div class="alert alert-info" ng-if="(monthGroup.posts | filter:postfilter).length > 0">
-                    {{monthGroup.month.format('MMMM YYYY')}}
+                <div ng-if="(monthGroup.posts | filter:postfilter).length > 0">
+                    <div class="alert alert-info">
+                        {{monthGroup.month.format('MMMM YYYY')}}
+                    </div>
+                    
+                    <table class="table tabled-bordered table-striped custom-table">
+                        <tbody>
+                            <tr ng-repeat="post in monthGroup.posts | filter:postfilter">
+                                <td>
+                                    <a href="{{post.link}}">
+                                        <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
+                                    </a>
+                                </td>
+                    
+                                <td>
+                                    <p class="ellipsis">
+                                        <a href="{{post.comments}}">{{post.title}}</a><br>
+                                        <span class="muted">{{post.domain}} ({{post.extension}})</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                
-                <table class="table tabled-bordered table-striped custom-table">
-                    <tbody>
-                        <tr ng-repeat="post in monthGroup.posts | filter:postfilter">
-                            <td>
-                                <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
-                                <!-- <div class="custom-thumb" style="background: url('{{post.thumbnail}}');"></div> -->
-                            </td>
-
-                            <td>
-                                <p class="ellipsis">
-                                    <a href="{{post.comments}}">{{post.title}}</a><br>
-                                    <span class="muted">{{post.domain}} ({{post.extension}})</span>
-                                </p>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             
             </div>
         </div>
