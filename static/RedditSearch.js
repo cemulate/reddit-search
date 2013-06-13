@@ -130,7 +130,7 @@ app.controller('AppController', ['$scope', '$http', function ($scope, $http) {
 
         if ($scope.mode == "userpage") {
             
-            url = "http://www.reddit.com/user/" + $scope.data.username + "/" + $scope.data.type + ".json?jsonp=?&limit=100&sort=new"
+            url = "http://www.reddit.com/user/" + $scope.data.username + "/" + $scope.data.userpage + ".json?jsonp=?&limit=100&sort=new"
         
         } else if ($scope.mode == "subreddit") {
             
