@@ -31,7 +31,7 @@
 
 <body ng-app="RedditSearch">
 
-<div class="container" ng-controller="AppController">
+<div class="container" ng-controller="MainController">
     
     <h2> Reddit Search </h2>
 
@@ -42,21 +42,21 @@
             <div class="well well-large">
                 
                 <ul class="nav nav-tabs">
-                    <li ng-class="mode == 'userpage' ? 'active' : ''">
-                        <a href="" ng-click="setMode('userpage')">By user page</a>
+                    <li ng-class="redditSearcher.mode == 'userpage' ? 'active' : ''">
+                        <a href="" ng-click="redditSearcher.mode = 'userpage'">By user page</a>
                     </li>
-                    <li ng-class="mode == 'subreddit' ? 'active' : ''">
-                        <a href="" ng-click="setMode('subreddit')">By subreddit</a>
+                    <li ng-class="redditSearcher.mode == 'subreddit' ? 'active' : ''">
+                        <a href="" ng-click="redditSearcher.mode = 'subreddit'">By subreddit</a>
                     </li>
                 </ul>
-
+                
                 <form novalidate onsubmit="return false">
-                    <div ng-switch on="mode">
+                    <div ng-switch on="redditSearcher.mode">
                         <div ng-switch-when="userpage">
                             <label for="">Username:</label>
-                            <input type="text" class="input" ng-model="form_data.username"></input>
+                            <input type="text" class="input" ng-model="mainQueryData.pending_data.username"></input>
                             <label for="">Feed:</label>
-                            <select name="" ng-model="form_data.userpage">
+                            <select name="" ng-model="mainQueryData.pending_data.userpage">
                                 <option value="liked">Liked</option>
                                 <option value="submitted">Submitted</option>
                                 <option value="disliked">Disliked</option>
@@ -64,47 +64,57 @@
                         </div>
                         <div ng-switch-when="subreddit">
                             <label for="">Subreddit (can be multi):</label>
-                            <input type="text" class="input" ng-model="form_data.subreddit"></input>
+                            <input type="text" class="input" ng-model="mainQueryData.pending_data.subreddit"></input>
                             <label for="">Feed sorting type:</label>
-                            <select name="" ng-model="form_data.subreddit_feed">
+                            <select name="" ng-model="mainQueryData.pending_data.subreddit_feed">
                                 <option value="new">New</option>
                                 <option value="hot">Hot</option>
                             </select>
                         </div>
                     </div>
                     <div class="controls">
-                        <button class="btn" ng-click="beginSearch()">Start</button>
-                        <img class="hspace20" ng-if="isBusy()" src="/static/ajax-loader.gif">
-                        <a class="hspace20" ng-if="isBusy()" ng-click="stopSearch()">Stop</a>
+                        <button class="btn" ng-click="redditSearcher.beginSearch()">Start</button>
+                        <img class="hspace20" ng-if="redditSearcher.isBusy()" src="/static/ajax-loader.gif">
+                        <a class="hspace20" ng-if="redditSearcher.isBusy()" ng-click="redditSearcher.stopSearch()">Stop</a>
                     </div>
                 </form>
+
+
                 <hr>
-                <div class="page-header">
-                    <h4>
-                        Filter results: 
-                        <small>
-                            {{(posts | filter:postfilter).length}} out of {{posts.length}} 
-                            <span class="muted" ng-if="reachedRedditLimit">(Last page)</span>
-                        </small>
-                    </h4>
-                </div>
+                <h4>
+                    Filter results: 
+                </h4>
+
+                <p class="muted">
+                    {{redditSearcher.searchState.totalPostsSearched}} total posts retrieved
+                    <span class="muted" ng-if="redditSearcher.searchState.reachedRedditLimit">(Last page)</span>
+                </p>
+
+                <hr>
+                
+
                 <form novalidate>
                     <label for="">Subreddit:</label>
-                    <input type="text" ng-model="postfilter.subreddit">
+                    <input type="text" ng-model="postFilter.subreddit">
                     <label for="">Title contains:</label>
-                    <input type="text" ng-model="postfilter.title">
+                    <input type="text" ng-model="postFilter.title">
                     <label for="">Domain:</label>
-                    <input type="text" ng-model="postfilter.domain">
+                    <input type="text" ng-model="postFilter.domain">
                     <label for="">Original poster:</label>
-                    <input type="text" ng-model="postfilter.op">
+                    <input type="text" ng-model="postFilter.op">
                     <label for="">File extension:</label>
-                    <input type="text" ng-model="postfilter.extension">
+                    <input type="text" ng-model="postFilter.extension">
                 </form>
+
+
             </div>
         </div>
+
+
+
         <div class="span8">
-            <div ng-if="error" ng-animate="{enter: 'animated fadeInDown'}">
-                <div ng-switch on="error" class="alert alert-warning">
+            <div ng-if="redditSearcher.searchState.error" ng-animate="{enter: 'animated fadeInDown'}">
+                <div ng-switch on="redditSearcher.searchState.error" class="alert alert-warning">
                     <div ng-switch-when="no_page">
                         <p> Timeout (or no such page) </p>
                         <p> You may be trying to access your /liked or /disliked feeds without them being public in Reddit's settings </p>
@@ -115,16 +125,16 @@
                 </div>    
             </div>
 
-            <div ng-repeat="monthGroup in monthGroups">
+            <div ng-repeat="monthGroup in redditSearcher.monthGroups">
                 
-                <div ng-if="(monthGroup.posts | filter:postfilter).length > 0">
+                <div ng-if="(monthGroup.posts | filter:postFilter).length > 0">
                     <div class="alert alert-info">
                         {{monthGroup.month.format('MMMM YYYY')}}
                     </div>
                     
                     <table class="table tabled-bordered table-striped custom-table">
                         <tbody>
-                            <tr ng-repeat="post in monthGroup.posts | filter:postfilter">
+                            <tr ng-repeat="post in monthGroup.posts | filter:postFilter | orderBy:date">
                                 <td>
                                     <a href="{{post.link}}">
                                         <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
@@ -152,12 +162,12 @@
 
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>-->
-<script src="http://code.angularjs.org/1.1.5/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js"></script>
 
 <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
 
-<script src="/static/RedditSearch.js"></script>
+<script src="/static/RedditSearcher.js"></script>
+<script src="/static/Application.js"></script>
 
 </body>
 
