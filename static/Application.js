@@ -32,27 +32,33 @@ app.controller("MainController", ["$scope", "redditSearcher", "mainQueryData", "
         extension: ""
     }
 
-    // $scope.handleFiltering = function () {
-    //     var ret = []
 
-    //     var total = 0
-    //     var i = 0
-        
-    //     for (i = 0; i < redditSearcher.monthGroups.length; i ++) {
-    //         var mg = redditSearcher.monthGroups[i]
-    //         var pf = $filter('filter')(mg.posts, $scope.postFilter)
-    //         ret.push({
-    //             month: mg.month,
-    //             posts: pf
-    //         })
 
-    //         total += pf.length
-    //         if (total > 300) {
-    //             break
-    //         }
-    //     }
+    $scope.getTotalPosts = function () {
+        return $scope.redditSearcher.monthGroups.reduce(function (prev, cur) {
+            return prev + cur.posts.length
+        }, 0)
+    }
 
-    //     return ret
-    // }
+    $scope.getTotalFilteredPosts = function () {
+        return $scope.redditSearcher.monthGroups.reduce(function (prev, cur) {
+            return prev + cur.filteredPostLength
+        }, 0)
+    }
+
+    // Instead of filtering in the html, we perform the filter here in hte controller
+    // This gives us a chance to "sneak in" the 'filteredPostLength' variable and 
+    // piggyback it onto the monthGroup object. 
+
+    // This way, every monthGroup object will have this additional filteredPostLength property,
+    // which 'getTotalFilteredPosts' can sum up to find the total number of results
+
+    $scope.filterPosts = function (monthGroup) {
+
+        var ret = $filter('filter')(monthGroup.posts, $scope.postFilter)
+        monthGroup.filteredPostLength = ret.length
+
+        return ret
+    }
 
 }])

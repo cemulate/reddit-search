@@ -86,7 +86,7 @@
                 </h4>
 
                 <p class="muted">
-                    {{redditSearcher.searchState.totalPostsSearched}} total posts retrieved
+                    {{getTotalFilteredPosts()}} results out of {{getTotalPosts()}} retrieved
                     <span class="muted" ng-if="redditSearcher.searchState.reachedRedditLimit">(Last page)</span>
                 </p>
 
@@ -127,14 +127,14 @@
 
             <div ng-repeat="monthGroup in redditSearcher.monthGroups">
                 
-                <div ng-if="(monthGroup.posts | filter:postFilter).length > 0">
+                <div ng-if="filterPosts(monthGroup).length > 0">
                     <div class="alert alert-info">
                         {{monthGroup.month.format('MMMM YYYY')}}
                     </div>
                     
                     <table class="table tabled-bordered table-striped custom-table">
                         <tbody>
-                            <tr ng-repeat="post in monthGroup.posts | filter:postFilter | orderBy:date">
+                            <tr ng-repeat="post in filterPosts(monthGroup)">
                                 <td>
                                     <a href="{{post.link}}">
                                         <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
