@@ -13,8 +13,19 @@ app.service("mainQueryData", function () {
     }
 })
 
-// Main application logic - defined in RedditSearcher.js
-app.service("redditSearch", ["$rootScope", "mainQueryData", RedditSearch])
+// This is an Angular wrapper around RedditSearch.js
+// It simply converts RedditSearch's callbacks into Angular $broadcasts
+
+app.factory("redditSearch", ["$rootScope", "mainQueryData", function ($rootScope, mainQueryData) {
+    return new RedditSearch(mainQueryData, {
+        "updated": function () {
+            $rootScope.$broadcast("redditSearch.updated")
+        },
+        "timedOut": function () {
+            $rootScope.$broadcast("redditSearch.timedOut")
+        }
+    })
+}])
 
 
 app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$filter", function ($scope, redditSearch, mainQueryData, $filter) {
@@ -32,14 +43,17 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         extension: ""
     }
 
-    // redditSearch doesn't $apply during it's async update, instead it uses
-    // a broadcast based approach. 
+    // Respond to RedditSearch callbacks = $broadcasts
 
     $scope.$on("redditSearch.updated", function () {
 
         $scope.doFiltering()
         $scope.$apply()
 
+    })
+
+    $scope.$on("redditSearch.timedOut", function () {
+        $scope.$apply()
     })
 
 

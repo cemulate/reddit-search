@@ -30,9 +30,9 @@ SimplePost.prototype.extractExtension = function (url) {
 }
 
 
-function RedditSearch($rootScope, mainQueryData) {
-    this.$rootScope = $rootScope
-    this.mainQueryData = mainQueryData
+function RedditSearch(queryData, callbacks) {
+    this.queryData = queryData
+    this.callbacks = callbacks
 
     this.monthGroups = []
 
@@ -69,11 +69,11 @@ RedditSearch.prototype.retrievePosts = function () {
 
     if (this.mode == "userpage") {
         
-        url = "http://www.reddit.com/user/" + this.mainQueryData.data.username + "/" + this.mainQueryData.data.userpage + ".json?jsonp=?&limit=100&sort=new"
+        url = "http://www.reddit.com/user/" + this.queryData.data.username + "/" + this.queryData.data.userpage + ".json?jsonp=?&limit=100&sort=new"
     
     } else if (this.mode == "subreddit") {
         
-        url = "http://www.reddit.com/r/" + this.mainQueryData.data.subreddit + "/" + this.mainQueryData.data.subreddit_feed + ".json?jsonp=?&limit=100"
+        url = "http://www.reddit.com/r/" + this.queryData.data.subreddit + "/" + this.queryData.data.subreddit_feed + ".json?jsonp=?&limit=100"
     
     }
 
@@ -149,18 +149,18 @@ RedditSearch.prototype.retrievePosts = function () {
             }, 3000)
         }
 
-        self.$rootScope.$broadcast("redditSearch.updated")
+        self.callbacks["updated"]()
     })
 
     this._errorTimeout = setTimeout(function () {
-        this.error = "no_page"
-        if (this._ajaxRequest) {
-            this._ajaxRequest.abort()
-            this._ajaxRequest = null
-            this.searchState.reachedRedditLimit = true
+        self.searchState.error = "no_page"
+        if (self._ajaxRequest) {
+            self._ajaxRequest.abort()
+            self._ajaxRequest = null
+            self.searchState.reachedRedditLimit = true
         }
 
-        self.$rootScope.$broadcast("redditSearch.timedOut")
+        self.callbacks["timedOut"]()
     }, 6000)
 
 }
@@ -194,7 +194,7 @@ RedditSearch.prototype.beginSearch = function () {
     // Reset all the intermediate variables
     this.reset()
 
-    this.mainQueryData.commit()
+    this.queryData.commit()
 
     // If the timer is not currently repeatedly calling retrieve, start it up. 
     // It will keep itself going after the first call
