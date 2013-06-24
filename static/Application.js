@@ -1,4 +1,4 @@
-app = angular.module("RedditSearch", [])
+app = angular.module("RedditSearchApplication", [])
 
 app.service("mainQueryData", function () {
     this.pending_data = {
@@ -14,15 +14,15 @@ app.service("mainQueryData", function () {
 })
 
 // Main application logic - defined in RedditSearcher.js
-app.service("redditSearcher", ["$rootScope", "mainQueryData", RedditSearcher])
+app.service("redditSearch", ["$rootScope", "mainQueryData", RedditSearch])
 
 
-app.controller("MainController", ["$scope", "redditSearcher", "mainQueryData", "$filter", function ($scope, redditSearcher, mainQueryData, $filter) {
-    $scope.redditSearcher = redditSearcher
+app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$filter", function ($scope, redditSearch, mainQueryData, $filter) {
+    $scope.redditSearch = redditSearch
     $scope.mainQueryData = mainQueryData
 
 
-    // The controller handles details about -displaying- the data that redditSearcher shouldn't be responsible for
+    // The controller handles details about -displaying- the data that redditSearch shouldn't be responsible for
 
     $scope.postFilter = {
         subreddit: "",
@@ -32,33 +32,43 @@ app.controller("MainController", ["$scope", "redditSearcher", "mainQueryData", "
         extension: ""
     }
 
+    // redditSearch doesn't $apply during it's async update, instead it uses
+    // a broadcast based approach. 
 
+    $scope.$on("redditSearch.updated", function () {
+
+        $scope.doFiltering()
+        $scope.$apply()
+
+    })
+
+
+    // The controller handles the filtering independently. This way is optimized for 
+    // The two-dimensional data structure we have
+
+    $scope.$watch("postFilter", function () {
+        $scope.doFiltering()
+    }, true)
+
+    $scope.doFiltering = function () {
+
+        // Month group by month group, filter group.posts into group.filteredPosts
+
+        angular.forEach($scope.redditSearch.monthGroups, function (g) {
+            g.filteredPosts = $filter('filter')(g.posts, $scope.postFilter)
+        })
+    }
 
     $scope.getTotalPosts = function () {
-        return $scope.redditSearcher.monthGroups.reduce(function (prev, cur) {
+        return $scope.redditSearch.monthGroups.reduce(function (prev, cur) {
             return prev + cur.posts.length
         }, 0)
     }
 
     $scope.getTotalFilteredPosts = function () {
-        return $scope.redditSearcher.monthGroups.reduce(function (prev, cur) {
-            return prev + cur.filteredPostLength
+        return $scope.redditSearch.monthGroups.reduce(function (prev, cur) {
+            return prev + cur.filteredPosts.length
         }, 0)
-    }
-
-    // Instead of filtering in the html, we perform the filter here in hte controller
-    // This gives us a chance to "sneak in" the 'filteredPostLength' variable and 
-    // piggyback it onto the monthGroup object. 
-
-    // This way, every monthGroup object will have this additional filteredPostLength property,
-    // which 'getTotalFilteredPosts' can sum up to find the total number of results
-
-    $scope.filterPosts = function (monthGroup) {
-
-        var ret = $filter('filter')(monthGroup.posts, $scope.postFilter)
-        monthGroup.filteredPostLength = ret.length
-
-        return ret
     }
 
 }])

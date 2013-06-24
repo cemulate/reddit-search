@@ -29,7 +29,7 @@
 
 
 
-<body ng-app="RedditSearch">
+<body ng-app="RedditSearchApplication">
 
 <div class="container" ng-controller="MainController">
     
@@ -42,16 +42,16 @@
             <div class="well well-large">
                 
                 <ul class="nav nav-tabs">
-                    <li ng-class="redditSearcher.mode == 'userpage' ? 'active' : ''">
-                        <a href="" ng-click="redditSearcher.mode = 'userpage'">By user page</a>
+                    <li ng-class="redditSearch.mode == 'userpage' ? 'active' : ''">
+                        <a href="" ng-click="redditSearch.mode = 'userpage'">By user page</a>
                     </li>
-                    <li ng-class="redditSearcher.mode == 'subreddit' ? 'active' : ''">
-                        <a href="" ng-click="redditSearcher.mode = 'subreddit'">By subreddit</a>
+                    <li ng-class="redditSearch.mode == 'subreddit' ? 'active' : ''">
+                        <a href="" ng-click="redditSearch.mode = 'subreddit'">By subreddit</a>
                     </li>
                 </ul>
                 
                 <form novalidate onsubmit="return false">
-                    <div ng-switch on="redditSearcher.mode">
+                    <div ng-switch on="redditSearch.mode">
                         <div ng-switch-when="userpage">
                             <label for="">Username:</label>
                             <input type="text" class="input" ng-model="mainQueryData.pending_data.username"></input>
@@ -73,9 +73,9 @@
                         </div>
                     </div>
                     <div class="controls">
-                        <button class="btn" ng-click="redditSearcher.beginSearch()">Start</button>
-                        <img class="hspace20" ng-if="redditSearcher.isBusy()" src="/static/ajax-loader.gif">
-                        <a class="hspace20" ng-if="redditSearcher.isBusy()" ng-click="redditSearcher.stopSearch()">Stop</a>
+                        <button class="btn" ng-click="redditSearch.beginSearch()">Start</button>
+                        <img class="hspace20" ng-if="redditSearch.isBusy()" src="/static/ajax-loader.gif">
+                        <a class="hspace20" ng-if="redditSearch.isBusy()" ng-click="redditSearch.stopSearch()">Stop</a>
                     </div>
                 </form>
 
@@ -87,7 +87,7 @@
 
                 <p class="muted">
                     {{getTotalFilteredPosts()}} results out of {{getTotalPosts()}} retrieved
-                    <span class="muted" ng-if="redditSearcher.searchState.reachedRedditLimit">(Last page)</span>
+                    <span class="muted" ng-if="redditSearch.searchState.reachedRedditLimit">(Last page)</span>
                 </p>
 
                 <hr>
@@ -113,8 +113,8 @@
 
 
         <div class="span8">
-            <div ng-if="redditSearcher.searchState.error" ng-animate="{enter: 'animated fadeInDown'}">
-                <div ng-switch on="redditSearcher.searchState.error" class="alert alert-warning">
+            <div ng-if="redditSearch.searchState.error" ng-animate="{enter: 'animated fadeInDown'}">
+                <div ng-switch on="redditSearch.searchState.error" class="alert alert-warning">
                     <div ng-switch-when="no_page">
                         <p> Timeout (or no such page) </p>
                         <p> You may be trying to access your /liked or /disliked feeds without them being public in Reddit's settings </p>
@@ -125,16 +125,16 @@
                 </div>    
             </div>
 
-            <div ng-repeat="monthGroup in redditSearcher.monthGroups">
+            <div ng-repeat="monthGroup in redditSearch.monthGroups">
                 
-                <div ng-if="filterPosts(monthGroup).length > 0">
+                <div ng-if="monthGroup.filteredPosts.length > 0">
                     <div class="alert alert-info">
                         {{monthGroup.month.format('MMMM YYYY')}}
                     </div>
                     
                     <table class="table tabled-bordered table-striped custom-table">
                         <tbody>
-                            <tr ng-repeat="post in filterPosts(monthGroup)">
+                            <tr ng-repeat="post in monthGroup.filteredPosts">
                                 <td>
                                     <a href="{{post.link}}">
                                         <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
@@ -166,7 +166,7 @@
 
 <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
 
-<script src="/static/RedditSearcher.js"></script>
+<script src="/static/RedditSearch.js"></script>
 <script src="/static/Application.js"></script>
 
 </body>
