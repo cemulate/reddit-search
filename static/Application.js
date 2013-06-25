@@ -17,12 +17,15 @@ app.service("mainQueryData", function () {
 // It simply converts RedditSearch's callbacks into Angular $broadcasts
 
 app.factory("redditSearch", ["$rootScope", "mainQueryData", function ($rootScope, mainQueryData) {
-    return new RedditSearch(mainQueryData, {
-        "updated": function () {
-            $rootScope.$broadcast("redditSearch.updated")
-        },
-        "timedOut": function () {
-            $rootScope.$broadcast("redditSearch.timedOut")
+    return new RedditSearch({
+        queryData: mainQueryData.data,
+        callbacks: {
+            "updated": function (newContentIndex) {
+                $rootScope.$broadcast("redditSearch.updated", newContentIndex)
+            },
+            "timedOut": function () {
+                $rootScope.$broadcast("redditSearch.timedOut")
+            }
         }
     })
 }])
@@ -43,46 +46,92 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         extension: ""
     }
 
-    // Respond to RedditSearch callbacks = $broadcasts
+    $scope.monthSortedData = []
 
-    $scope.$on("redditSearch.updated", function () {
+    /*
+        redditSearch maintains a raw array of posts. For reasons of efficiency and display, the controller
+        maintains its own store of individual arrays of posts, each belonging to a particular month.
 
-        $scope.doFiltering()
-        $scope.$apply()
+        We build this modified data store from the posts of redditSearch each time it retrieves more
+    */
 
-    })
+    
+    // Called on redditSearch.update broadcast
 
-    $scope.$on("redditSearch.timedOut", function () {
-        $scope.$apply()
-    })
+    $scope.buildMonthSortedData = function(startFrom) {
 
+        var i = 0
+        var j = 0
 
-    // The controller handles the filtering independently. This way is optimized for 
-    // The two-dimensional data structure we have
+        for (i = startFrom; i < $scope.redditSearch.posts.length; i ++) {
+            var p = $scope.redditSearch.posts[i]
+            
+            var found = false
+            for (j = 0; j < $scope.monthSortedData.length; j ++) {
+                var mg = $scope.monthSortedData[j]
+                if (p.date.startOf("month").isSame(mg.month)) {
+                    mg.posts.push(p)
+                    found = true
+                }
+            }
 
-    $scope.$watch("postFilter", function () {
-        $scope.doFiltering()
-    }, true)
+            if (!found) {
+                $scope.monthSortedData.push({
+                    month: p.date.startOf("month"),
+                    posts: [p]
+                })
+            }
+        }
+    }
+    
+    // Called on both redditSearch.update AND $watch for postFilter
 
     $scope.doFiltering = function () {
 
-        // Month group by month group, filter group.posts into group.filteredPosts
-
-        angular.forEach($scope.redditSearch.monthGroups, function (g) {
+        angular.forEach($scope.monthSortedData, function (g) {
             g.filteredPosts = $filter('filter')(g.posts, $scope.postFilter)
         })
     }
 
     $scope.getTotalPosts = function () {
-        return $scope.redditSearch.monthGroups.reduce(function (prev, cur) {
+        return $scope.monthSortedData.reduce(function (prev, cur) {
             return prev + cur.posts.length
         }, 0)
     }
 
     $scope.getTotalFilteredPosts = function () {
-        return $scope.redditSearch.monthGroups.reduce(function (prev, cur) {
+        return $scope.monthSortedData.reduce(function (prev, cur) {
             return prev + cur.filteredPosts.length
         }, 0)
     }
+
+
+    $scope.commitAndBeginSearch = function () {
+        
+        $scope.monthSortedData.length = 0
+
+        $scope.mainQueryData.commit()
+        $scope.redditSearch.beginSearch()
+    }
+
+
+    // Watchers and broadcasts
+
+    $scope.$on("redditSearch.updated", function (broadcast, newContentIndex) {
+        console.log("redditSearch.updated")
+        $scope.buildMonthSortedData(newContentIndex)
+
+        $scope.doFiltering()
+        $scope.$apply()
+
+    })
+
+    $scope.$on("redditSearch.timedOut", function (broadcast) {
+        $scope.$apply()
+    })
+
+    $scope.$watch("postFilter", function () {
+        $scope.doFiltering()
+    }, true)
 
 }])

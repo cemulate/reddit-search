@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="controls">
-                        <button class="btn" ng-click="redditSearch.beginSearch()">Start</button>
+                        <button class="btn" ng-click="commitAndBeginSearch()">Start</button>
                         <img class="hspace20" ng-if="redditSearch.isBusy()" src="/static/ajax-loader.gif">
                         <a class="hspace20" ng-if="redditSearch.isBusy()" ng-click="redditSearch.stopSearch()">Stop</a>
                     </div>
@@ -125,7 +125,7 @@
                 </div>    
             </div>
 
-            <div ng-repeat="monthGroup in redditSearch.monthGroups">
+            <div ng-repeat="monthGroup in monthSortedData">
                 
                 <div ng-if="monthGroup.filteredPosts.length > 0">
                     <div class="alert alert-info">

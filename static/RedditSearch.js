@@ -30,11 +30,29 @@ SimplePost.prototype.extractExtension = function (url) {
 }
 
 
-function RedditSearch(queryData, callbacks) {
-    this.queryData = queryData
-    this.callbacks = callbacks
 
-    this.monthGroups = []
+/* config argument documentation:
+
+    config = {
+        queryData: {
+            username: <string>,
+            userpage: <string>,
+            subreddit: <string>,
+            subreddit_feed: <string>
+        },
+        callbacks: {
+            updated: <function(newContentIndex)>
+            timedOut: <function()>
+        }
+    }
+
+*/
+
+function RedditSearch(config) {
+    this.queryData = config.queryData
+    this.callbacks = config.callbacks
+
+    this.posts = []
 
     this.searchState = {}
 
@@ -44,7 +62,7 @@ function RedditSearch(queryData, callbacks) {
 }
 
 RedditSearch.prototype.reset = function () {
-    this.monthGroups.length = 0
+    this.posts.length = 0
 
     this.searchState.pagesSearched = 0
     this.searchState.postsSearched = 0
@@ -69,11 +87,11 @@ RedditSearch.prototype.retrievePosts = function () {
 
     if (this.mode == "userpage") {
         
-        url = "http://www.reddit.com/user/" + this.queryData.data.username + "/" + this.queryData.data.userpage + ".json?jsonp=?&limit=100&sort=new"
+        url = "http://www.reddit.com/user/" + this.queryData.username + "/" + this.queryData.userpage + ".json?jsonp=?&limit=100&sort=new"
     
     } else if (this.mode == "subreddit") {
         
-        url = "http://www.reddit.com/r/" + this.queryData.data.subreddit + "/" + this.queryData.data.subreddit_feed + ".json?jsonp=?&limit=100"
+        url = "http://www.reddit.com/r/" + this.queryData.subreddit + "/" + this.queryData.subreddit_feed + ".json?jsonp=?&limit=100"
     
     }
 
@@ -99,6 +117,8 @@ RedditSearch.prototype.retrievePosts = function () {
         }
 
 
+        var newIndex = self.posts.length
+
         var i = 0
         for (i = 0; i < ret.data.children.length; i ++) {
 
@@ -107,28 +127,30 @@ RedditSearch.prototype.retrievePosts = function () {
             var sp = new SimplePost(orig)
             // self.posts.push(sp)
 
-            var postMonth = sp.date.startOf('month')
+            // var postMonth = sp.date.startOf('month')
 
-            var j = 0
-            var found = false
-            for (j = 0; j < self.monthGroups.length; j ++) {
-                var cg = self.monthGroups[j]
-                if (cg.month.isSame(postMonth)) {
-                    cg.posts.push(sp)
-                    found = true
-                }
-            }
+            // var j = 0
+            // var found = false
+            // for (j = 0; j < self.monthGroups.length; j ++) {
+            //     var cg = self.monthGroups[j]
+            //     if (cg.month.isSame(postMonth)) {
+            //         cg.posts.push(sp)
+            //         found = true
+            //     }
+            // }
 
-            if (found == false) {
-                self.monthGroups.push({
-                    month: postMonth,
-                    posts: [sp]
-                })
-            }
+            // if (found == false) {
+            //     self.monthGroups.push({
+            //         month: postMonth,
+            //         posts: [sp]
+            //     })
+            // }
+
+            self.posts.push(sp)
+
         }
 
         self.searchState.pagesSearched += 1
-        self.searchState.totalPostsSearched += ret.data.children.length
         
         // If it returned less than 100 items, that's the end of the road
         var lastindex = ret.data.children.length - 1
@@ -149,7 +171,7 @@ RedditSearch.prototype.retrievePosts = function () {
             }, 3000)
         }
 
-        self.callbacks["updated"]()
+        self.callbacks["updated"](newIndex)
     })
 
     this._errorTimeout = setTimeout(function () {
@@ -193,8 +215,6 @@ RedditSearch.prototype.beginSearch = function () {
 
     // Reset all the intermediate variables
     this.reset()
-
-    this.queryData.commit()
 
     // If the timer is not currently repeatedly calling retrieve, start it up. 
     // It will keep itself going after the first call
