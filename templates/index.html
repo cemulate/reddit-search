@@ -15,16 +15,6 @@
 
     <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
 
-    <script>
-
-        function imgError(image) {
-            image.onerror = ""
-            image.src = "/static/noimage2.png"
-            return true
-        }
-
-    </script>
-
 </head>
 
 
@@ -137,7 +127,7 @@
                             <tr ng-repeat="post in monthGroup.filteredPosts">
                                 <td>
                                     <a href="{{post.link}}">
-                                        <img class="custom-thumb" style="border: 1px solid black;" src="{{post.thumbnail}}" onerror="imgError(this)">
+                                        <img class="custom-thumb with-border" src="{{post.thumbnail}}" onerror="imgError(this)">
                                     </a>
                                 </td>
                     
@@ -168,6 +158,16 @@
 
 <script src="/static/RedditSearch.js"></script>
 <script src="/static/Application.js"></script>
+
+<script>
+
+    function imgError(image) {
+        image.onerror = ""
+        image.src = "/static/noimage.png"
+        return true
+    }
+
+</script>
 
 </body>
 
