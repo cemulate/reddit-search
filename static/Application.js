@@ -31,34 +31,31 @@ app.factory("redditSearch", ["$rootScope", "mainQueryData", function ($rootScope
 }])
 
 
-app.filter("monthHeaders", function () {
-    return function (orig) {
+app.filter("headerChunk", function () {
+    return function (orig, same, getChunkID) {
         if (!(orig instanceof Array)) return orig;
         if (orig.length == 0) return orig;
 
         var result = []
 
-        var cmonth = null
         var cur = []
 
         var i = 0
         for (i = 0; i < orig.length; i ++) {
-            var pmonth = moment(orig[i].date).startOf("month")
-            if (cmonth == null || cmonth.isSame(pmonth)) {
+            if (i == 0 || same(orig[i], orig[i-1])) {
                 cur.push(orig[i])
             } else {
                 result.push({
-                    month: cmonth,
+                    month: getChunkID(orig[i-1]),
                     items: cur
                 })
 
                 cur = [orig[i]]
             }
-            cmonth = pmonth
         }
 
         result.push({
-            month: cmonth,
+            month: getChunkID(orig[orig.length - 1]),
             items: cur
         })
 
@@ -93,7 +90,16 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         $scope.filteredData = $filter("filter")($scope.redditSearch.posts, $scope.postFilter)
         $scope.filteredData = $filter("limitTo")($scope.filteredData, 300)
         $scope.filteredData = $filter("orderBy")($scope.filteredData, function (p) {return p.date.unix()}, true)
-        $scope.filteredData = $filter("monthHeaders")($scope.filteredData)
+        
+        $scope.filteredData = $filter("headerChunk")(
+            $scope.filteredData, 
+            function (p1, p2) {
+                return ((p1.date.month() == p2.date.month()) && (p1.date.year() == p2.date.year())) 
+            },
+            function (p) {
+                return moment(p.date).startOf("month")
+            }
+        )
 
     }
 
