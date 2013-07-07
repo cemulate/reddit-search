@@ -69,3 +69,7 @@ p.ellipsis {
     color: red;
     font-weight: bold;
 }
+
+span.emph {
+    font-weight: bold;
+}

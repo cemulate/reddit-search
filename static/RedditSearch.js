@@ -68,7 +68,7 @@ RedditSearch.prototype.reset = function () {
     this.searchState.postsSearched = 0
     this.searchState.reachedRedditLimit = false
     
-    this.searchState.totalPostsSearched = 0
+    this.searchState.totalPostsRetrieved = 0
 
     this.searchState._latestChildName = null
 
@@ -122,35 +122,12 @@ RedditSearch.prototype.retrievePosts = function () {
         var i = 0
         for (i = 0; i < ret.data.children.length; i ++) {
 
-            var orig = ret.data.children[i]
-            
-            var sp = new SimplePost(orig)
-            // self.posts.push(sp)
-
-            // var postMonth = sp.date.startOf('month')
-
-            // var j = 0
-            // var found = false
-            // for (j = 0; j < self.monthGroups.length; j ++) {
-            //     var cg = self.monthGroups[j]
-            //     if (cg.month.isSame(postMonth)) {
-            //         cg.posts.push(sp)
-            //         found = true
-            //     }
-            // }
-
-            // if (found == false) {
-            //     self.monthGroups.push({
-            //         month: postMonth,
-            //         posts: [sp]
-            //     })
-            // }
-
-            self.posts.push(sp)
+            self.posts.push(new SimplePost(ret.data.children[i]))
 
         }
 
         self.searchState.pagesSearched += 1
+        self.searchState.totalPostsRetrieved += ret.data.children.length
         
         // If it returned less than 100 items, that's the end of the road
         var lastindex = ret.data.children.length - 1

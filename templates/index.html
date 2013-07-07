@@ -76,7 +76,11 @@
                 </h4>
 
                 <p class="muted">
-                    {{getTotalFilteredPosts()}} results out of {{getTotalPosts()}} retrieved
+                    <span ng-class="(getTotalFilteredPosts() == 300) ? 'emph' : ''">
+                        {{getTotalFilteredPosts()}}
+                    </span>
+                    <span ng-if="getTotalFilteredPosts() == 300"> + </span>
+                    results out of {{redditSearch.searchState.totalPostsRetrieved}} retrieved
                     <span class="muted" ng-if="redditSearch.searchState.reachedRedditLimit">(Last page)</span>
                 </p>
 
@@ -115,7 +119,7 @@
                 </div>    
             </div>
 
-            <div ng-repeat="monthGroup in monthSortedData">
+            <!-- <div ng-repeat="monthGroup in monthSortedData">
                 
                 <div ng-if="monthGroup.filteredPosts.length > 0">
                     <div class="alert alert-info">
@@ -142,13 +146,42 @@
                     </table>
                 </div>
             
-            </div>
+            </div> -->
+
+            <div ng-repeat="monthGroup in filteredData">
+                
+                <div ng-if="monthGroup.items.length > 0">
+                    <div class="alert alert-info">
+                        {{monthGroup.month.format('MMMM YYYY')}}
+                    </div>
+                    
+                    <table class="table tabled-bordered table-striped custom-table">
+                        <tbody>
+                            <tr ng-repeat="post in monthGroup.items">
+                                <td>
+                                    <a href="{{post.link}}">
+                                        <img class="custom-thumb with-border" src="{{post.thumbnail}}" onerror="imgError(this)">
+                                    </a>
+                                </td>
+                    
+                                <td>
+                                    <p class="ellipsis">
+                                        <a href="{{post.comments}}">{{post.title}}</a><br>
+                                        <span class="muted">{{post.domain}} ({{post.extension}})</span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            
+            </div>            
+            
+
         </div>
     </div>
 
 </div>
-
-
 
 
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
