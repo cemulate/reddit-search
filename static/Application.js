@@ -46,7 +46,7 @@ app.filter("headerChunk", function () {
                 cur.push(orig[i])
             } else {
                 result.push({
-                    month: getChunkID(orig[i-1]),
+                    id: getChunkID(orig[i-1]),
                     items: cur
                 })
 
@@ -55,7 +55,7 @@ app.filter("headerChunk", function () {
         }
 
         result.push({
-            month: getChunkID(orig[orig.length - 1]),
+            id: getChunkID(orig[orig.length - 1]),
             items: cur
         })
 
