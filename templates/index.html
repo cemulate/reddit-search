@@ -23,9 +23,11 @@
 
 <div class="container" ng-controller="MainController">
     
-    <h2> Reddit Search </h2>
-
-    <hr>
+    <div class="page-header">
+        <h1>
+            Reddit Search <small>Can't find that post?</small>
+        </h1>
+    </div>
 
     <div class="row-fluid">
         <div class="span4">
@@ -44,9 +46,9 @@
                     <div ng-switch on="redditSearch.mode">
                         <div ng-switch-when="userpage">
                             <label for="">Username:</label>
-                            <input type="text" class="input" ng-model="mainQueryData.pending_data.username"></input>
+                            <input type="text" class="input span12" ng-model="mainQueryData.pending_data.username"></input>
                             <label for="">Feed:</label>
-                            <select name="" ng-model="mainQueryData.pending_data.userpage">
+                            <select class="span12" name="" ng-model="mainQueryData.pending_data.userpage">
                                 <option value="liked">Liked</option>
                                 <option value="submitted">Submitted</option>
                                 <option value="disliked">Disliked</option>
@@ -54,23 +56,22 @@
                         </div>
                         <div ng-switch-when="subreddit">
                             <label for="">Subreddit (can be multi):</label>
-                            <input type="text" class="input" ng-model="mainQueryData.pending_data.subreddit"></input>
+                            <input type="text" class="input span12" ng-model="mainQueryData.pending_data.subreddit"></input>
                             <label for="">Feed sorting type:</label>
-                            <select name="" ng-model="mainQueryData.pending_data.subreddit_feed">
+                            <select class="span12" name="" ng-model="mainQueryData.pending_data.subreddit_feed">
                                 <option value="new">New</option>
                                 <option value="hot">Hot</option>
                             </select>
                         </div>
                     </div>
-                    <div class="controls">
-                        <button class="btn" ng-click="commitAndBeginSearch()">Start</button>
-                        <img class="hspace20" ng-if="redditSearch.isBusy()" src="/static/ajax-loader.gif">
-                        <a class="hspace20" ng-if="redditSearch.isBusy()" ng-click="redditSearch.stopSearch()">Stop</a>
-                    </div>
+                    <button type="submit" class="btn btn-block" ng-click="toggleSearch()">
+                        <span ng-if="redditSearch.isBusy()">Stop</span>
+                        <span ng-if="!redditSearch.isBusy()">Start</span>
+                    </button>
                 </form>
 
-
                 <hr>
+
                 <h4>
                     Filter results: 
                 </h4>
@@ -82,6 +83,7 @@
                     <span ng-if="getTotalFilteredPosts() == 300"> + </span>
                     results out of {{redditSearch.searchState.totalPostsRetrieved}} retrieved
                     <span class="muted" ng-if="redditSearch.searchState.reachedRedditLimit">(Last page)</span>
+                    <img class ="hspace20" src="/static/ajax-loader.gif" ng-if="redditSearch.isBusy()">
                 </p>
 
                 <hr>
@@ -89,15 +91,15 @@
 
                 <form novalidate>
                     <label for="">Subreddit:</label>
-                    <input type="text" ng-model="postFilter.subreddit">
+                    <input class="span12" type="text" ng-model="postFilter.subreddit">
                     <label for="">Title contains:</label>
-                    <input type="text" ng-model="postFilter.title">
+                    <input class="span12" type="text" ng-model="postFilter.title">
                     <label for="">Domain:</label>
-                    <input type="text" ng-model="postFilter.domain">
+                    <input class="span12" type="text" ng-model="postFilter.domain">
                     <label for="">Original poster:</label>
-                    <input type="text" ng-model="postFilter.op">
+                    <input class="span12" type="text" ng-model="postFilter.op">
                     <label for="">File extension:</label>
-                    <input type="text" ng-model="postFilter.extension">
+                    <input class="span12" type="text" ng-model="postFilter.extension">
                 </form>
 
 
@@ -118,35 +120,6 @@
                     </div>
                 </div>    
             </div>
-
-            <!-- <div ng-repeat="monthGroup in monthSortedData">
-                
-                <div ng-if="monthGroup.filteredPosts.length > 0">
-                    <div class="alert alert-info">
-                        {{monthGroup.month.format('MMMM YYYY')}}
-                    </div>
-                    
-                    <table class="table tabled-bordered table-striped custom-table">
-                        <tbody>
-                            <tr ng-repeat="post in monthGroup.filteredPosts">
-                                <td>
-                                    <a href="{{post.link}}">
-                                        <img class="custom-thumb with-border" src="{{post.thumbnail}}" onerror="imgError(this)">
-                                    </a>
-                                </td>
-                    
-                                <td>
-                                    <p class="ellipsis">
-                                        <a href="{{post.comments}}">{{post.title}}</a><br>
-                                        <span class="muted">{{post.domain}} ({{post.extension}})</span>
-                                    </p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            
-            </div> -->
 
             <div ng-repeat="monthGroup in filteredData">
                 

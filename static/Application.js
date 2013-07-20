@@ -116,6 +116,14 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
     }
 
 
+    $scope.toggleSearch = function () {
+        if ($scope.redditSearch.isBusy()) {
+            $scope.redditSearch.stopSearch()
+        } else {
+            $scope.commitAndBeginSearch()
+        }
+    }
+
     $scope.commitAndBeginSearch = function () {
         
         $scope.filteredData.length = 0
