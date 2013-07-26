@@ -103,11 +103,7 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
 
     }
 
-    $scope.asdf = function () {
-        for (var i = 0; i < $scope.filteredData.length; i ++) {
-            console.log($scope.filteredData[i].date)
-        }
-    }
+    // Convenience functions for UI bindings
 
     $scope.getTotalFilteredPosts = function () {
         return $scope.filteredData.reduce(function (prev, cur) {
@@ -115,6 +111,17 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         }, 0)
     }
 
+    $scope.getDisplayTextForExtension = function (post) {
+        if (!post.extension || post.extension.length == 0) {
+            return ""
+        } else {
+            return "(" + post.extension + ")"
+        }
+    }
+
+    
+
+    // Actions
 
     $scope.toggleSearch = function () {
         if ($scope.redditSearch.isBusy()) {
@@ -132,6 +139,8 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         $scope.redditSearch.beginSearch()
     }
 
+
+    
 
     // Watchers and broadcasts
 

@@ -9,11 +9,13 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/style.css" rel="stylesheet">
-    <link href="/static/animate.css" rel="stylesheet">
-
+    <link href="/static/bootstrap/css/bootstrap.min.Flatstrap.css" rel="stylesheet">
     <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic' rel='stylesheet' type='text/css'>
+    <link href="/static/style.css" rel="stylesheet">
+
+    <link href="/static/animate.css" rel="stylesheet">
 
 </head>
 
@@ -64,7 +66,7 @@
                             </select>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-block" ng-click="toggleSearch()">
+                    <button type="submit" class="btn btn-block btn-info" ng-click="toggleSearch()">
                         <span ng-if="redditSearch.isBusy()">Stop</span>
                         <span ng-if="!redditSearch.isBusy()">Start</span>
                     </button>
@@ -139,8 +141,10 @@
                     
                                 <td>
                                     <p class="ellipsis">
-                                        <a href="{{post.comments}}">{{post.title}}</a><br>
-                                        <span class="muted">{{post.domain}} ({{post.extension}})</span>
+                                        <a href="{{post.comments}}">{{post.title}}</a>
+                                    </p>
+                                    <p>
+                                        <i>{{post.domain}} &nbsp; {{getDisplayTextForExtension(post)}}</i>
                                     </p>
                                 </td>
                             </tr>
