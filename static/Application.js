@@ -1,5 +1,9 @@
 app = angular.module("RedditSearchApplication", [])
 
+app.config(['$compileProvider', function($compileProvider) {   
+    $compileProvider.urlSanitizationWhitelist(/^\s*(https?|ftp|mailto|chrome-extension|blob):/);
+}])
+
 app.service("mainQueryData", function () {
     this.pending_data = {
         username: "",
@@ -82,13 +86,23 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         extension: ""
     }
 
+    $scope.settings = {
+        maxDisplayed: 300,
+        collapsedMonths: []
+    }
+
+    $scope.JSONExportData = {
+        blob: null,
+        link: ""
+    }
+
     $scope.filteredData = []
     
 
-    $scope.doFiltering = function () {
+    $scope.doFiltering = function (orderBefore) {
 
         $scope.filteredData = $filter("filter")($scope.redditSearch.posts, $scope.postFilter)
-        $scope.filteredData = $filter("limitTo")($scope.filteredData, 300)
+        $scope.filteredData = $filter("limitTo")($scope.filteredData, $scope.settings.maxDisplayed)
         $scope.filteredData = $filter("orderBy")($scope.filteredData, function (p) {return p.date.unix()}, true)
         
         $scope.filteredData = $filter("headerChunk")(
@@ -119,6 +133,28 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         }
     }
 
+    $scope.isMonthGroupCollapsed = function (mg) {
+        var r = util.softIndexOf(mg.id, $scope.settings.collapsedMonths, function (a, b) { return a.isSame(b) })
+        return (r > -1)
+    }
+
+    $scope.isAnyMonthGroupCollapsed = function () {
+        return ($scope.settings.collapsedMonths.length > 0)
+    }
+
+    $scope.toggleMonthGroupCollapsed = function (mg) {
+        var ind = util.softIndexOf(mg.id, $scope.settings.collapsedMonths, function (a, b) { return a.isSame(b) })
+        if (ind > -1) {
+            $scope.settings.collapsedMonths.splice(ind, 1)
+        } else {
+            $scope.settings.collapsedMonths.push(mg.id)
+        }
+    }
+
+    $scope.expandAll = function () {
+        $scope.settings.collapsedMonths.length = 0
+    }
+
     
 
     // Actions
@@ -139,6 +175,12 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
         $scope.redditSearch.beginSearch()
     }
 
+    $scope.exportJSON = function () {
+        var s = JSON.stringify($scope.redditSearch.posts)
+        $scope.JSONExportData.blob = new Blob([s])
+        $scope.JSONExportData.link = window.URL.createObjectURL($scope.JSONExportData.blob)
+    }
+
 
     
 
@@ -155,6 +197,10 @@ app.controller("MainController", ["$scope", "redditSearch", "mainQueryData", "$f
     })
 
     $scope.$watch("postFilter", function () {
+        $scope.doFiltering()
+    }, true)
+
+    $scope.$watch("settings", function () {
         $scope.doFiltering()
     }, true)
 

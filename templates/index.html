@@ -9,8 +9,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <link href="/static/bootstrap/css/bootstrap.min.Flatstrap.css" rel="stylesheet">
+    <link href="/static/bootstrap/css/bootstrap.flatstrap.css" rel="stylesheet">
     <link href="/static/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/static/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,400italic' rel='stylesheet' type='text/css'>
     <link href="/static/style.css" rel="stylesheet">
@@ -76,16 +77,21 @@
 
                 <h4>
                     Filter results: 
+                    <small class="left-space20" ng-if="getTotalFilteredPosts() == settings.maxDisplayed">
+                        <a href="" ng-click="settings.maxDisplayed = settings.maxDisplayed + 150">
+                            Show more
+                        </a>
+                    </small>
                 </h4>
 
                 <p class="muted">
-                    <span ng-class="(getTotalFilteredPosts() == 300) ? 'emph' : ''">
+                    <span ng-class="(getTotalFilteredPosts() == settings.maxDisplayed) ? 'emph' : ''">
                         {{getTotalFilteredPosts()}}
                     </span>
-                    <span ng-if="getTotalFilteredPosts() == 300"> + </span>
+                    <span ng-if="getTotalFilteredPosts() == settings.maxDisplayed"> + </span>
                     results out of {{redditSearch.searchState.totalPostsRetrieved}} retrieved
                     <span class="muted" ng-if="redditSearch.searchState.reachedRedditLimit">(Last page)</span>
-                    <img class ="hspace20" src="/static/ajax-loader.gif" ng-if="redditSearch.isBusy()">
+                    <img class ="left-space20" src="/static/ajax-loader.gif" ng-if="redditSearch.isBusy()">
                 </p>
 
                 <hr>
@@ -104,6 +110,15 @@
                     <input class="span12" type="text" ng-model="postFilter.extension">
                 </form>
 
+                <hr>
+    
+                <a href="" ng-click="exportJSON()">
+                    Export/download JSON data: &nbsp;
+                </a>
+
+                <a href="{{JSONExportData.link}}" download="exported.json" ng-hide="JSONExportData.link.length == 0">
+                    Download link
+                </a>
 
             </div>
         </div>
@@ -126,11 +141,17 @@
             <div ng-repeat="monthGroup in filteredData">
                 
                 <div ng-if="monthGroup.items.length > 0">
-                    <div class="alert alert-info">
+                    <div class="alert alert-info bigtext">
                         {{monthGroup.id.format('MMMM YYYY')}}
+                        <a href="" class="right" ng-click="toggleMonthGroupCollapsed(monthGroup)">
+                            <i ng-class="isMonthGroupCollapsed(monthGroup) ? 'icon-plus' : 'icon-minus'"></i>
+                        </a>
+                        <a href="" class="right right-space20" ng-if="$first && isAnyMonthGroupCollapsed()" ng-click="expandAll()">
+                            Expand all
+                        </a>
                     </div>
                     
-                    <table class="table tabled-bordered table-striped custom-table">
+                    <table class="table tabled-bordered table-striped custom-table" ng-hide="isMonthGroupCollapsed(monthGroup)">
                         <tbody>
                             <tr ng-repeat="post in monthGroup.items">
                                 <td>
@@ -152,8 +173,7 @@
                     </table>
                 </div>
             
-            </div>            
-            
+            </div>
 
         </div>
     </div>
@@ -166,6 +186,7 @@
 
 <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
 
+<script src="/static/util.js"></script>
 <script src="/static/RedditSearch.js"></script>
 <script src="/static/Application.js"></script>
 

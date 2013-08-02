@@ -4,10 +4,6 @@ body {
     font-family: "Open Sans", sans-serif;
 }
 
-.alert {
-    font-size: 16px;
-}
-
 
 
 /* Table customization */
@@ -66,13 +62,22 @@ p.ellipsis {
     font-weight: bold;
 }
 
+.bigtext {
+    font-size: 16px;
+}
+
 span.emph {
     font-weight: bold;
 }
 
-span.right {
+
+
+.right {
     float: right;
 }
+
+
+
 
 .space20 {
     height: 20px;
@@ -90,6 +95,15 @@ span.right {
     height: 60px;
 }
 
-.hspace20 {
+.left-space20 {
     margin-left: 20px;
+}
+
+.right-space20 {
+    margin-right: 20px;
+}
+
+.just-space20 {
+    margin-left: 10px;
+    margin-right: 10px;
 }
