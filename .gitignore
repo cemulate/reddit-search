@@ -5,3 +5,5 @@ venv
 *.sublime-project
 *.sublime-workspace
 *.layout
+
+Thumbs.db
