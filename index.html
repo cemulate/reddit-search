@@ -91,7 +91,7 @@
                     <span ng-if="getTotalFilteredPosts() == settings.maxDisplayed"> + </span>
                     results out of {{redditSearch.searchState.totalPostsRetrieved}} retrieved
                     <span class="muted" ng-if="redditSearch.searchState.reachedRedditLimit">(Last page)</span>
-                    <img class ="left-space20" src="/static/ajax-loader.gif" ng-if="redditSearch.isBusy()">
+                    <img class ="left-space20" src="static/ajax-loader.gif" ng-if="redditSearch.isBusy()">
                 </p>
 
                 <hr>
@@ -186,15 +186,15 @@
 
 <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
 
-<script src="/static/util.js"></script>
-<script src="/static/RedditSearch.js"></script>
-<script src="/static/Application.js"></script>
+<script src="static/util.js"></script>
+<script src="static/RedditSearch.js"></script>
+<script src="static/Application.js"></script>
 
 <script>
 
     function imgError(image) {
         image.onerror = ""
-        image.src = "/static/noimage.png"
+        image.src = "static/noimage.png"
         return true
     }
 
