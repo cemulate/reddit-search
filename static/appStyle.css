@@ -1,0 +1,49 @@
+body {
+    font-family: "Open Sans", sans-serif;
+}
+
+p.ellipsis {
+    text-overflow: ellipsis;
+}
+
+p.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+span.buffer-20 {
+    width: 20px;
+}
+
+.custom-data-row p {
+    font-size: 14px;
+    margin: 0px 10px 0px 0px;
+}
+
+.custom-data-row img {
+    width: 50px;
+    height: 34px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(120, 120, 120);
+    margin: 5px 15px 5px 5px;
+}
+
+.custom-data-row hr {
+    margin: 0px;
+}
+
+.custom-data-row .buffer {
+    height: 10px;
+}
+
+#resultsArea div:nth-child(even) {
+    background-color: rgb(249, 249, 249);
+}
+
+.custom-update-button:disabled {
+    background-color: rgb(230,230,230);
+    color: rgb(60, 60, 60);
+    margin: 1px solid black;
+}

@@ -1,0 +1,123 @@
+<div class="row">
+			
+	<div class="large-4 columns panel">
+
+		<form>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						Username
+						<input type="text" placeholder="Username" value="{{mainQueryData.username}}"/>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						Feed
+						<select value="{{mainQueryData.userpage}}">
+							<option value="liked">Liked</option>
+							<option value="disliked">Disliked</option>
+							<option value="submitted">Submitted</option>
+						</select>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<input type="button" on-click="toggleStart" class="button small expand" value="{{#if redditSearch.searchState.inProgress}} Stop {{else}} Start {{/if}}">
+				</div>
+			</div>
+
+		</form>
+
+		<hr>
+
+		<p>
+			{{#if (filteredPosts.length == displaySettings.maxDisplayed)}}
+				<strong> {{filteredPosts.length}} + </strong>
+			{{else}}
+				{{filteredPosts.length}}
+			{{/if}}
+			results out of {{redditSearch.searchState.totalPostsRetrieved}} retrieved
+			<span class="buffer-20"></span>
+			{{#if redditSearch.searchState.inProgress}} <img src="static/ajax-loader.gif"> {{/if}}
+		</p>
+
+		<form>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						Subreddit:
+						<input type="text" on-change="filterDataChange" placeholder="Subreddit" value="{{rawFilterData.subreddit}}"/>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						Title contains:
+						<input type="text" on-change="filterDataChange" placeholder="Title contains" value="{{rawFilterData.title}}"/>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						Domain:
+						<input type="text" on-change="filterDataChange" placeholder="Domain" value="{{rawFilterData.domain}}"/>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						Original Poster:
+						<input type="text" on-change="filterDataChange" placeholder="Original Poster" value="{{rawFilterData.op}}"/>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<label>
+						File Extension:
+						<input type="text" on-change="filterDataChange" placeholder="File Extension" value="{{rawFilterData.extension}}"/>
+					</label>
+				</div>
+			</div>
+			<div class="row">
+				<div class="large-12 columns">
+					<input type="button" class="button small expand custom-update-button" value="{{filterUpdateNeeded ? 'Update' : 'Applied'}}" disabled="{{!filterUpdateNeeded}}">
+				</div>
+			</div>
+		</form>
+
+	</div>
+
+	<div id="resultsArea" class="large-8 columns">
+
+		{{#filteredPosts}}
+
+
+			<div class="custom-data-row">
+				<div class="buffer"></div>
+				<a href="{{link}}">
+					<img class="left" src="{{thumbnail}}">
+				</a>
+				<p class="truncate">
+					<a href="{{comments}}">{{title}}</a>
+				</p>
+				<p>
+					<i>{{domain}} &nbsp; {{getDisplayedTextForExtension(this)}}</i>
+				</p>
+				<div class="buffer"></div>
+				<hr>
+			</div>
+			
+
+		{{/filteredPosts}}
+
+
+	</div>
+
+</div>
