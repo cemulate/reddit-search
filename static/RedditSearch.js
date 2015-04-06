@@ -167,6 +167,8 @@ RedditSearch.prototype.stopSearch = function() {
         this._ajaxRequest.abort();
         this._ajaxRequest = null;
     }
+
+    this.searchState.inProgress = false;
 };
  
 RedditSearch.prototype.beginSearch = function() {

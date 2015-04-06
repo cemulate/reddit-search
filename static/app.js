@@ -1,6 +1,6 @@
 $.ajax("static/appTemplate.html").then(function(appTemplate) {
 
-	ractive = new Ractive({
+	var ractive = new Ractive({
 		el: 'appContainer',
 		template: appTemplate,
 		data: {
@@ -28,73 +28,79 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 			filteredPosts: [],
 			displaySettings: {
 				maxDisplayed: 50
+			},
+			getDisplayedTextForExtension: function (post) {
+				if (post == null) {
+					return "";
+				}
+				if (!post.extension || post.extension.length == 0) {
+					return "";
+				} else {
+					return "(" + post.extension + ")";
+				}
 			}
 		},
-		magic: true
+		magic: false
 	});
-
-	// The callback function to filter the the raw redditSeach.posts
-	ractive.data.postFilter = function (x) {
-		return (x.subreddit.indexOf(ractive.data.filterData.subreddit) > -1) &&
-			   (x.title.indexOf(ractive.data.filterData.title) > -1) &&
-			   (x.domain.indexOf(ractive.data.filterData.domain) > -1) &&
-			   (x.op.indexOf(ractive.data.filterData.op) > -1) &&
-			   (x.extension.indexOf(ractive.data.filterData.extension) > -1);
-	};
-
-	// Function to filter by filterData and cut to maxDisplayed length
-	ractive.data.doFiltering = function() {
-		var temp = ractive.data.redditSearch.posts.filter(ractive.data.postFilter);
-		if (temp.length > ractive.data.displaySettings.maxDisplayed) {
-			temp = temp.slice(0, ractive.data.displaySettings.maxDisplayed);
-		}
-		ractive.data.filteredPosts = temp;
-	};
-
-	ractive.data.getDisplayedTextForExtension = function (post) {
-        if (!post.extension || post.extension.length == 0) {
-            return ""
-        } else {
-            return "(" + post.extension + ")"
-        }
-    }
 
 	// Observe filterData property changes to trigger filtering
 	ractive.observe("rawFilterData.*", function(oldVal, newVal, keypath) {
-		ractive.data.filterUpdateNeeded = true;
+		this.set("filterUpdateNeeded", true);
 	});
+
+	var postFilter = function (x) {
+		return (x.subreddit.indexOf(ractive.get("filterData.subreddit")) > -1) &&
+			   (x.title.indexOf(ractive.get("filterData.title")) > -1) &&
+			   (x.domain.indexOf(ractive.get("filterData.domain")) > -1) &&
+			   (x.op.indexOf(ractive.get("filterData.op")) > -1) &&
+			   (x.extension.indexOf(ractive.get("filterData.extension")) > -1);
+	}
+
+	var doFiltering = function() {
+		var temp = ractive.get("redditSearch.posts").filter(postFilter);
+		if (temp.length > ractive.get("displaySettings.maxDisplayed")) {
+			temp = temp.slice(0, ractive.get("displaySettings.maxDisplayed"));
+		}
+		ractive.set("filteredPosts", temp);
+	}
 
 	ractive.on("filterDataChange", function(event) {
 		// Commit the filter data
-		for (var key in ractive.data.rawFilterData) {
-			ractive.data.filterData[key] = ractive.data.rawFilterData[key];
+		var rawFilterData = this.get("rawFilterData");
+		for (var key in rawFilterData) {
+			this.set("filterData." + key, rawFilterData[key]);
 		}
-		ractive.data.doFiltering();
-		ractive.data.filterUpdateNeeded = false;
+
+		doFiltering();
+		
+		this.set("filterUpdateNeeded", false);
 	});
 
 	// Configure the RedditSearch
-	ractive.data.redditSearch.configure({
-		queryData: ractive.data.mainQueryData,
+	ractive.get("redditSearch").configure({
+		queryData: ractive.get("mainQueryData"),
 		callbacks: {
-			updated: function() { 
-				ractive.data.doFiltering();
+			updated: function () {
+				doFiltering();
+				ractive.update("redditSearch.searchState");
 			},
-			timedOut: function() { 
-				ractive.data.doFiltering();
+			timedOut: function () {
+				doFiltering();
+				ractive.update("redditSearch.searchState");
 			}
 		}
 	});
 
 	// On start event, tell redditSearch to begin
 	ractive.on("toggleStart", function(event) {
-		if (ractive.data.redditSearch.searchState.inProgress) {
-			ractive.data.redditSearch.stopSearch();
-			ractive.data.searchInProgress = false;
+		if (this.get("redditSearch.searchState.inProgress")) {
+			this.get("redditSearch").stopSearch();
+			this.update("redditSearch.searchState");
 		} else {
-			ractive.data.redditSearch.reset();
-			ractive.data.redditSearch.beginSearch();
-			ractive.data.searchInProgress = true;
+			this.set("filteredPosts", []);
+			this.get("redditSearch").reset();
+			this.get("redditSearch").beginSearch();
+			this.update("redditSearch.searchState");
 		}
 	});
 
