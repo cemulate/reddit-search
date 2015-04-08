@@ -50,9 +50,9 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 
 	var postFilter = function (x) {
 		return (x.subreddit.indexOf(ractive.get("filterData.subreddit")) > -1) &&
-			   (x.title.indexOf(ractive.get("filterData.title")) > -1) &&
+			   (x.title.toLowerCase().indexOf(ractive.get("filterData.title").toLowerCase()) > -1) &&
 			   (x.domain.indexOf(ractive.get("filterData.domain")) > -1) &&
-			   (x.op.indexOf(ractive.get("filterData.op")) > -1) &&
+			   (x.op.toLowerCase().indexOf(ractive.get("filterData.op").toLowerCase()) > -1) &&
 			   (x.extension.indexOf(ractive.get("filterData.extension")) > -1);
 	}
 
@@ -103,5 +103,7 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 			this.update("redditSearch.searchState");
 		}
 	});
+
+	console.log(ractive);
 
 });

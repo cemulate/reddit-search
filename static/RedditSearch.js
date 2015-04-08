@@ -5,7 +5,7 @@ function SimplePost(origPost) {
     this.comments = "http://www.reddit.com" + origPost.data.permalink;
     this.link = origPost.data.url;
     this.thumbnail = origPost.data.thumbnail;
-    this.subreddit = origPost.data.subreddit;
+    this.subreddit = origPost.data.subreddit.toLowerCase();
     this.op = origPost.data.author;
     this.domain = this.extractDomain(this.link);
     this.extension = this.extractExtension(this.link);
