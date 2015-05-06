@@ -1,6 +1,37 @@
 $.ajax("static/appTemplate.html").then(function(appTemplate) {
 
+	var initFilterData = {
+		subreddit: '',
+		title: '',
+		domain: '',
+		op: '',
+		extension: ''
+	};
+
+	var afterRender = function () {
+		
+		// Setup delayed searching. This makes sure that when rawFilterData is changed by
+		// the user, the page will wait until they 'stop typing' before committing 
+		// rawFilterData to filterData, which will trigger Ractive to filter and update
+
+		var self = this; // the Ractive
+
+		var commit = function () {
+			// Commit rawFilterData to filterData -- ractive will now update the template
+			self.set("filterData", JSON.parse(JSON.stringify(self.get("rawFilterData"))));
+		}
+
+		// https://github.com/dennyferra/TypeWatch
+		$(".rawFilterData-text").typeWatch({
+			callback: commit,
+			wait: 300,
+			highlight: true,
+			captureLength: 0
+		});
+	};
+
 	var ractive = new Ractive({
+		magic: false,
 		el: 'appContainer',
 		template: appTemplate,
 		data: {
@@ -8,21 +39,8 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 				username: '',
 				userpage: 'liked'
 			},
-			rawFilterData: {
-				subreddit: '',
-				title: '',
-				domain: '',
-				op: '',
-				extension: ''
-			},
-			filterData: {
-				subreddit: '',
-				title: '',
-				domain: '',
-				op: '',
-				extension: ''
-			},
-			filterUpdateNeeded: false,
+			rawFilterData: JSON.parse(JSON.stringify(initFilterData)),
+			filterData: JSON.parse(JSON.stringify(initFilterData)),
 			searchInProgress: false,
 			redditSearch: new RedditSearch(),
 			filteredPosts: [],
@@ -40,12 +58,7 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 				}
 			}
 		},
-		magic: false
-	});
-
-	// Observe filterData property changes to trigger filtering
-	ractive.observe("rawFilterData.*", function(oldVal, newVal, keypath) {
-		this.set("filterUpdateNeeded", true);
+		onrender: afterRender
 	});
 
 	var postFilter = function (x) {
@@ -54,7 +67,7 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 			   (x.domain.indexOf(ractive.get("filterData.domain")) > -1) &&
 			   (x.op.toLowerCase().indexOf(ractive.get("filterData.op").toLowerCase()) > -1) &&
 			   (x.extension.indexOf(ractive.get("filterData.extension")) > -1);
-	}
+	};
 
 	var doFiltering = function() {
 		var temp = ractive.get("redditSearch.posts").filter(postFilter);
@@ -62,18 +75,10 @@ $.ajax("static/appTemplate.html").then(function(appTemplate) {
 			temp = temp.slice(0, ractive.get("displaySettings.maxDisplayed"));
 		}
 		ractive.set("filteredPosts", temp);
-	}
+	};
 
-	ractive.on("filterDataChange", function(event) {
-		// Commit the filter data
-		var rawFilterData = this.get("rawFilterData");
-		for (var key in rawFilterData) {
-			this.set("filterData." + key, rawFilterData[key]);
-		}
-
+	ractive.observe("filterData", function(oldVal, newVal, keypath) {
 		doFiltering();
-		
-		this.set("filterUpdateNeeded", false);
 	});
 
 	// Configure the RedditSearch
